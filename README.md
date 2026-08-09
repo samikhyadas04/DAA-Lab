@@ -11,13 +11,6 @@
 
 ---
 
-## 🛠️ Tech Stack
-
-- **Language:** C
-- **Compiler:** GCC (MinGW-w64 on Windows)
-- **Plotting:** Gnuplot (PNG chart generation)
-- **Data Output:** CSV
-- **Editor:** VS Code
 
 ---
 
