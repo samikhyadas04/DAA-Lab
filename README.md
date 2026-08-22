@@ -2,11 +2,10 @@
 <div align="center">
 
 # 🚀 Design and Analysis of Algorithms (DAA)
+This repository contains solutions to my DAA Lab of 3rd semester.
 
-### 📖 B.Tech CSE • Semester 3
-
-**Design and Analysis of Algorithms Laboratory**
-
+Name : Samikhya Das
+ID: B125109
 </div>
 
 
