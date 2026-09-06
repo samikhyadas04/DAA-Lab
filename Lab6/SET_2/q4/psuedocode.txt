@@ -1,0 +1,86 @@
+DAA Lab-06, Question 4
+Sorting via reverse(p,i,j) - Pseudocode
+===========================================
+
+Input representation: permutation p[0..n-1] of {1,...,n}.
+Primitive operation: reverse(p, i, j) reverses the closed range
+p[i..j]; cost(reverse(p,i,j)) = j - i + 1 for Part 2.
+
+
+PART 1: sort using O(n) reversals (selection-sort via reversal)
+--------------------------------------------------------------------
+SORT_LINEAR(p, n):
+    for i = 0 to n-2:
+        target <- i + 1
+        j <- index of target in p[i .. n-1]
+        if j != i:
+            reverse(p, i, j)
+
+
+PART 2: sort with total reversal-length cost O(n log^2 n)
+---------------------------------------------------------------
+
+Building block - rotate via 3 reversals
+(brings block p[m..r) in front of block p[l..m), half-open [l, r)):
+
+ROTATE(p, l, m, r):
+    if l == m or m == r:
+        return
+    reverse(p, l,   m-1)
+    reverse(p, m,   r-1)
+    reverse(p, l,   r-1)
+
+
+Binary search helpers (p[lo..hi) assumed sorted ascending):
+
+UPPER_BOUND(p, lo, hi, val):        # first index with p[idx] > val
+    while lo < hi:
+        mid <- lo + (hi-lo)/2
+        if p[mid] <= val: lo <- mid+1
+        else: hi <- mid
+    return lo
+
+LOWER_BOUND(p, lo, hi, val):        # first index with p[idx] >= val
+    while lo < hi:
+        mid <- lo + (hi-lo)/2
+        if p[mid] < val: lo <- mid+1
+        else: hi <- mid
+    return lo
+
+
+Recursive in-place merge (half-open indices [lo,mid) and [mid,hi),
+each already sorted):
+
+MERGE_INPLACE(p, lo, mid, hi):
+    if lo >= mid or mid >= hi:
+        return
+    if p[mid-1] <= p[mid]:
+        return                          # already merged: 0 cost
+    if hi - lo == 2:
+        reverse(p, lo, hi-1)
+        return
+
+    if mid - lo <= hi - mid:
+        m2 <- mid + (hi-mid)/2
+        pivot <- p[m2]
+        m1 <- UPPER_BOUND(p, lo, mid, pivot)
+    else:
+        m1 <- lo + (mid-lo)/2
+        pivot <- p[m1]
+        m2 <- LOWER_BOUND(p, mid, hi, pivot)
+
+    ROTATE(p, m1, mid, m2)
+    newMid <- m1 + (m2 - mid)
+    MERGE_INPLACE(p, lo,     m1, newMid)
+    MERGE_INPLACE(p, newMid, m2, hi)
+
+
+Merge sort driver (half-open [lo, hi)):
+
+MERGE_SORT_VIA_REVERSAL(p, lo, hi):
+    if hi - lo <= 1:
+        return
+    mid <- lo + (hi-lo)/2
+    MERGE_SORT_VIA_REVERSAL(p, lo, mid)
+    MERGE_SORT_VIA_REVERSAL(p, mid, hi)
+    MERGE_INPLACE(p, lo, mid, hi)

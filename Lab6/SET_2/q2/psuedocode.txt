@@ -1,0 +1,110 @@
+DAA Lab-06, Question 2
+2D Square Matrix Operations - Pseudocode
+===========================================
+
+Input representation: n x n matrix stored as M[0..n-1][0..n-1],
+row-major, O(1) random access to any entry.
+
+
+(i) Matrix addition
+---------------------
+ADD(A, B, n):
+    for i = 0 to n-1:
+        for j = 0 to n-1:
+            C[i][j] <- A[i][j] + B[i][j]
+    return C
+
+
+(ii) Matrix multiplication
+-----------------------------
+MULT(A, B, n):
+    for i = 0 to n-1:
+        for j = 0 to n-1:
+            sum <- 0
+            for k = 0 to n-1:
+                sum <- sum + A[i][k] * B[k][j]
+            C[i][j] <- sum
+    return C
+
+
+(iii) Is the matrix a zero matrix?
+-------------------------------------
+IS_ZERO(M, n):
+    for i = 0 to n-1:
+        for j = 0 to n-1:
+            if M[i][j] != 0:
+                return false
+    return true
+
+
+(iv) Is the matrix symmetric?
+--------------------------------
+IS_SYMMETRIC(M, n):
+    for i = 0 to n-1:
+        for j = i+1 to n-1:
+            if M[i][j] != M[j][i]:
+                return false
+    return true
+
+
+(v) Determinant (Gaussian elimination with partial pivoting)
+-----------------------------------------------------------------
+DET(M, n):
+    det <- 1
+    for col = 0 to n-1:
+        pivotRow <- row r in [col..n-1] with max |M[r][col]|
+        if M[pivotRow][col] == 0:
+            return 0                      # singular matrix
+        if pivotRow != col:
+            swap rows(col, pivotRow) of M
+            det <- -det                   # row swap flips sign
+        for r = col+1 to n-1:
+            factor <- M[r][col] / M[col][col]
+            for c = col to n-1:
+                M[r][c] <- M[r][c] - factor * M[col][c]
+        det <- det * M[col][col]
+    return det
+
+
+(vi) Transpose in situ (in place)
+-------------------------------------
+TRANSPOSE_IN_PLACE(M, n):
+    for i = 0 to n-1:
+        for j = i+1 to n-1:
+            swap(M[i][j], M[j][i])
+
+
+(vii) Eigenvalues & eigenvectors (Jacobi eigenvalue algorithm,
+      restricted to symmetric matrices)
+----------------------------------------------------------------
+JACOBI(A, n, maxSweeps):
+    V <- identity matrix of size n
+    for sweep = 1 to maxSweeps:
+        off <- sum of A[i][j]^2 for all i < j
+        if off < epsilon:
+            break
+        for p = 0 to n-1:
+            for q = p+1 to n-1:
+                if |A[p][q]| < epsilon:
+                    continue
+                theta <- (A[q][q] - A[p][p]) / (2 * A[p][q])
+                t <- sign(theta) / (|theta| + sqrt(theta^2 + 1))
+                c <- 1 / sqrt(t^2 + 1)
+                s <- t * c
+                # update rows/columns p and q of A using (c, s)
+                app <- A[p][p]; aqq <- A[q][q]; apq <- A[p][q]
+                A[p][p] <- c*c*app - 2*s*c*apq + s*s*aqq
+                A[q][q] <- s*s*app + 2*s*c*apq + c*c*aqq
+                A[p][q] <- A[q][p] <- 0
+                for k = 0 to n-1, k != p, k != q:
+                    akp <- A[k][p]; akq <- A[k][q]
+                    A[k][p] <- A[p][k] <- c*akp - s*akq
+                    A[k][q] <- A[q][k] <- s*akp + c*akq
+                # accumulate the rotation into the eigenvector matrix V
+                for k = 0 to n-1:
+                    vkp <- V[k][p]; vkq <- V[k][q]
+                    V[k][p] <- c*vkp - s*vkq
+                    V[k][q] <- s*vkp + c*vkq
+    eigenvalues  <- diagonal of A
+    eigenvectors <- columns of V
+    return (eigenvalues, eigenvectors)

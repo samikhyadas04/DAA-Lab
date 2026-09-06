@@ -1,0 +1,16 @@
+DAA Lab-6, Q2: 0/1 Knapsack (DP) - Pseudocode
+
+KNAPSACK(n, weight[], profit[], W)
+    let dp[0..n][0..W] be a new array
+
+    for i = 0 to n
+        for w = 0 to W
+            if i == 0 or w == 0
+                dp[i][w] = 0
+            else if weight[i-1] <= w
+                dp[i][w] = max(profit[i-1] + dp[i-1][w - weight[i-1]],
+                                dp[i-1][w])
+            else
+                dp[i][w] = dp[i-1][w]
+
+    return dp[n][W]

@@ -1,0 +1,15 @@
+DAA Lab-6, Q1: Fibonacci (DP) - Pseudocode
+
+FIBONACCI(n)
+    if n <= 1
+        return n
+
+    let dp[0..n] be a new array
+
+    dp[0] = 0
+    dp[1] = 1
+
+    for i = 2 to n
+        dp[i] = dp[i-1] + dp[i-2]
+
+    return dp[n]

@@ -1,0 +1,19 @@
+DAA Lab-6, Q4: Matrix Chain Multiplication (DP) - Pseudocode
+
+MATRIX-CHAIN-ORDER(arr[], n)
+    // arr[0..n-1] holds dimensions; matrix i has dimensions arr[i-1] x arr[i]
+    let dp[1..n-1][1..n-1] be a new array
+
+    for i = 1 to n-1
+        dp[i][i] = 0
+
+    for len = 2 to n-1              // chain length
+        for i = 1 to n-len
+            j = i + len - 1
+            dp[i][j] = INFINITY
+            for k = i to j-1
+                cost = dp[i][k] + dp[k+1][j] + arr[i-1]*arr[k]*arr[j]
+                if cost < dp[i][j]
+                    dp[i][j] = cost
+
+    return dp[1][n-1]

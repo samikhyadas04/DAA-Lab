@@ -1,0 +1,111 @@
+DAA Lab-06, Question 1
+1D Array Operations - Pseudocode
+==================================
+
+Input representation: array arr[0..n-1] of n integers.
+
+
+(i) Maximum element
+--------------------
+MAX(arr, n):
+    max <- arr[0]
+    for i = 1 to n-1:
+        if arr[i] > max: max <- arr[i]
+    return max
+
+
+(ii) First and second largest elements
+----------------------------------------
+FIRST_SECOND(arr, n):
+    first <- second <- -infinity
+    for i = 0 to n-1:
+        if arr[i] > first:
+            second <- first
+            first  <- arr[i]
+        else if arr[i] > second and arr[i] != first:
+            second <- arr[i]
+    return (first, second)
+
+
+(iii) Mean
+-----------
+MEAN(arr, n):
+    sum <- 0
+    for i = 0 to n-1:
+        sum <- sum + arr[i]
+    return sum / n
+
+
+(iv) Median
+------------
+MEDIAN(arr, n):
+    tmp <- copy of arr
+    sort(tmp)                          # O(n log n) comparison sort
+    if n is even:
+        return (tmp[n/2 - 1] + tmp[n/2]) / 2
+    else:
+        return tmp[n/2]
+
+
+(v) Standard deviation
+-----------------------
+STDDEV(arr, n, mean):
+    sumSq <- 0
+    for i = 0 to n-1:
+        sumSq <- sumSq + (arr[i] - mean)^2
+    return sqrt(sumSq / n)
+
+
+(vi) Mode
+----------
+MODE(arr, n):
+    tmp <- sorted copy of arr           # O(n log n)
+    mode <- tmp[0]
+    best <- 1
+    cur  <- 1
+    for i = 1 to n-1:
+        if tmp[i] == tmp[i-1]:
+            cur <- cur + 1
+        else:
+            cur <- 1
+        if cur > best:
+            best <- cur
+            mode <- tmp[i]
+    return mode
+
+
+(vii) Removing all duplicates
+-------------------------------
+REMOVE_DUP(arr, n):
+    sort(arr)                           # O(n log n)
+    j <- 0
+    for i = 1 to n-1:
+        if arr[i] != arr[j]:
+            j <- j + 1
+            arr[j] <- arr[i]
+    return j + 1                        # new logical length
+
+
+(viii) Reversing the array
+-----------------------------
+REVERSE(arr, n):
+    i <- 0
+    j <- n - 1
+    while i < j:
+        swap(arr[i], arr[j])
+        i <- i + 1
+        j <- j - 1
+
+
+(ix) Partitioning w.r.t. a random pivot (>= pivot placed BEFORE < pivot)
+--------------------------------------------------------------------------
+PARTITION_GE_FIRST(arr, n, pivotIndex):
+    pivot <- arr[pivotIndex]
+    swap(arr[pivotIndex], arr[n-1])     # move pivot out of the way
+    store <- 0
+    for i = 0 to n-2:
+        if arr[i] >= pivot:
+            swap(arr[i], arr[store])
+            store <- store + 1
+    swap(arr[store], arr[n-1])          # drop pivot into its final slot
+    return store                        # pivot's final index

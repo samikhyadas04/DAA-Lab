@@ -1,0 +1,68 @@
+DAA Lab-06, Question 3
+O(n log n) Divide-and-Conquer Convolution - Pseudocode
+==========================================================
+
+Input representation: vectors A (length m), B (length n, n >= m)
+represented as arrays of complex numbers (real inputs have
+imaginary part 0).
+
+Problem: C[k] = sum_{j=0}^{m-1} A[j] * B[k-j],  k = 0 .. m+n-2
+(B[i] treated as 0 outside 0 <= i < n)
+
+
+Recursive radix-2 FFT (Cooley-Tukey) - the divide-and-conquer step
+----------------------------------------------------------------------
+FFT(a, L, invert):                 # L must be a power of two
+    if L == 1:
+        return a
+
+    even <- [a[0], a[2], a[4], ...]    # DIVIDE: size L/2
+    odd  <- [a[1], a[3], a[5], ...]    # DIVIDE: size L/2
+
+    FFT(even, L/2, invert)             # CONQUER (recursive)
+    FFT(odd,  L/2, invert)             # CONQUER (recursive)
+
+    sign <- invert ? +1 : -1
+    for k = 0 to L/2 - 1:               # COMBINE: O(L)
+        w <- exp(sign * 2*pi*i * k / L)     # i = sqrt(-1)
+        t <- w * odd[k]
+        a[k]         <- even[k] + t
+        a[k + L/2]   <- even[k] - t
+
+    return a
+
+IFFT(a, L):
+    FFT(a, L, invert = true)
+    for i = 0 to L-1:
+        a[i] <- a[i] / L
+    return a
+
+
+Next power of two
+--------------------
+NEXT_POW2(x):
+    L <- 1
+    while L < x:
+        L <- L * 2
+    return L
+
+
+O(n log n) convolution
+--------------------------
+CONVOLVE(A, m, B, n):
+    resultLen <- m + n - 1
+    L <- NEXT_POW2(resultLen)
+
+    pad A with zeros to length L        # fa
+    pad B with zeros to length L        # fb
+
+    FFT(fa, L, invert = false)
+    FFT(fb, L, invert = false)
+
+    for i = 0 to L-1:
+        fa[i] <- fa[i] * fb[i]          # point-wise multiply
+
+    IFFT(fa, L)
+
+    C <- real part of fa[0 .. resultLen-1]
+    return C
