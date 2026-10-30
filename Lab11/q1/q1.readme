@@ -1,0 +1,74 @@
+# Q1: Shortest Path on Parity-Constrained Graphs via 0-1 BFS
+
+**Source file:** `q1_parity_01bfs.c`
+
+## Problem
+Directed graph, source `S`, penalty `C >= 0`, edge weights in {0,1}.
+`Cost(P) = W(P) + (C if k1(P) is odd, else 0)`.
+Find the minimum `Cost(P)` from `S` to every vertex, or report it unreachable.
+
+## Key observation
+Every weight is 0 or 1, so `W(P) = k1(P)`. "k1 is odd" is therefore the same as "W is odd".
+The cost depends only on the total weight `W` and its parity.
+For a fixed parity, a smaller `W` is always better. So it is enough to know, for each vertex, the minimum `W` with even parity and the minimum `W` with odd parity.
+
+## Algorithm
+1. Build a state graph with states `(v, p)`, where `p` is the parity of the weight so far.
+   - weight-0 edge `u -> v`: `(u,p) -> (v,p)`, cost 0
+   - weight-1 edge `u -> v`: `(u,p) -> (v,1-p)`, cost 1
+2. Run 0-1 BFS from `(S,0)` using a deque.
+   - Cost-0 relaxations are pushed to the front.
+   - Cost-1 relaxations are pushed to the back.
+   - The deque always stays sorted by distance, so the first time a state is popped its distance is final. Stale entries are skipped with a `done[]` flag.
+3. For each vertex: `answer[v] = min(dist[v][0], dist[v][1] + C)`.
+   If both values are infinite, print `UNREACHABLE`.
+
+Paths are treated as walks (vertices and edges may repeat). This is the standard reading and is what the state graph computes.
+
+## Input representation
+Adjacency list stored in arrays (`head`, `next`, `to`, `weight`). Vertices are numbered `1..n`.
+```
+n m S C
+u v w          (m lines: directed edge u -> v with weight w in {0,1})
+```
+
+## Output
+```
+Vertex : MinCost
+1 : <cost or UNREACHABLE>
+...
+```
+
+## Sample
+Input:
+```
+4 5 1 5
+1 2 1
+2 3 1
+1 3 1
+3 4 0
+1 1 0
+```
+Output:
+```
+1 : 0
+2 : 6
+3 : 2
+4 : 2
+```
+Explanation:
+- Vertex 2: the only path has W=1 (odd), so the cost is 1+5 = 6.
+- Vertex 3: the path 1->2->3 has W=2 (even), so the cost is 2. The direct edge would cost 1+5 = 6.
+- Vertex 4: continue from 3 over a weight-0 edge, so the cost is 2.
+
+## Complexity
+- The state graph has 2V states and 2E transitions.
+- Each state is finalised once, and each edge is relaxed at most once per source state.
+- **Time:** O(V + E)
+- **Space:** O(V + E). This covers the adjacency list, 2V distances, and a deque of size at most 4E+4.
+
+## Compile and run
+```bash
+gcc -O2 -Wall -o q1 q1_parity_01bfs.c
+./q1 < input1.txt
+```

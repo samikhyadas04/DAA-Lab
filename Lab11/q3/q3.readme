@@ -1,0 +1,82 @@
+# Q3: Bidirectional BFS for Shortest Transformation Sequence in a Word Graph
+
+**Source file:** `q3_bidirectional_bfs_wordgraph.c`
+
+## Problem
+Dictionary `D` of `N` unique words, all of length `L`. Start word `A`, target word `B`.
+One step changes exactly one character, and the new word must be in `D`.
+Find the minimum number of mutations `k` from `A` to `B`, or `-1` if impossible.
+
+Constraints: `N <= 10^5`, `L <= 10`, lowercase letters only.
+
+Rules used:
+- `B` must be in `D`, otherwise the answer is `-1`.
+- `A` does not need to be in `D`.
+- If `A == B`, the answer is `0`.
+
+## Algorithm
+1. **Hash table.** Store all words in an open-addressing hash table (FNV-1a hash, table size 2^18, which is more than twice the maximum number of words). Each word gets an integer id.
+2. **Implicit graph.** The graph is not built, since that would cost O(N^2 L). Neighbours of a word are found by changing each of its `L` positions to each of the 25 other letters and looking the candidate up in the table.
+3. **Bidirectional BFS.** Run BFS from `A` and from `B` at the same time.
+   - Each round, expand the **smaller** frontier by one complete level.
+   - Mark visited nodes with `side[v] = 1` (from A) or `2` (from B) and keep `dist[v]`.
+   - If a generated word is already marked by the opposite side, the answer is `dist[u] + 1 + dist[v]`.
+   - If either frontier becomes empty, no path exists and the answer is `-1`.
+
+### Why the first meeting is optimal
+Each side expands full levels, and no meeting occurred in earlier levels. So the visited sets are disjoint and every earlier level of the other side has already had all its neighbours visited by that side.
+Therefore any node of the opposite side that touches the current level must be on that side's current frontier. Every meeting found in this round then gives the same total, `d + 1 + dB`, and the first one found is the minimum.
+
+### Why bidirectional
+A one-sided BFS with branching factor `b` and answer `d` explores about `b^d` nodes. Bidirectional search explores about `2 * b^(d/2)`. Always expanding the smaller frontier keeps the work balanced.
+
+## Input representation
+Hash table from word to id, a `char[N+2][12]` array for the words, and integer arrays for `side`, `dist` and the two frontiers.
+```
+N L
+word_1
+...
+word_N
+A B
+```
+
+## Output
+A single integer: the minimum number of mutations, or `-1`.
+
+## Samples
+Input:
+```
+6 3
+hot
+dot
+dog
+lot
+log
+cog
+hit cog
+```
+Output: `4` (hit -> hot -> dot -> dog -> cog). Here `A = hit` is not in `D`, which is allowed.
+
+Input (target `cog` removed from the dictionary):
+```
+5 3
+hot
+dot
+dog
+lot
+log
+hit cog
+```
+Output: `-1`
+
+## Complexity
+- Building the table: O(N L)
+- Each expanded word generates 25L candidates, and each lookup hashes and compares up to `L` characters.
+- **Time:** O(N * 26 * L^2) in the worst case. For N = 10^5 and L = 10 this is about 2.6 x 10^8 simple operations. Bidirectional search usually visits far fewer nodes in practice.
+- **Space:** O(N L) for the words, the hash table, and the `side`, `dist` and frontier arrays.
+
+## Compile and run
+```bash
+gcc -O2 -Wall -o q3 q3_bidirectional_bfs_wordgraph.c
+./q3 < input3.txt
+```
